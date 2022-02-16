@@ -1,8 +1,9 @@
 #include "lemipc.h"
 
+t_lem	lem;
+
 int	main(void)
 {
-	t_lem	lem;
 	int		ret;
 
 	init_lem(&lem);

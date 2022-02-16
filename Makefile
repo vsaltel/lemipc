@@ -17,6 +17,7 @@ OBJDIR	=	objs
 
 FILES	=	main.c			\
 			create_game.c	\
+			semaphore.c		\
 			display.c		\
 			game_process.c	\
 			utils.c

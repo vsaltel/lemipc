@@ -31,22 +31,22 @@ static void	init_shm(t_lem *lem)
 		while (++i < MAP_SIZE)
 			lem->shm->area[y][i] = 0;
 	}
+	lem->shm->player_round = 1;
+	lem->shm->game_state = 1;
 }
 
 int	load_game(t_lem	*lem)
 {
-	int		n;
-
-	n = 0;
-	while (++n < lem->nb_player)
+	while (++lem->player_id < lem->nb_player)
 	{
-		if (n == (lem->nb_player / 2) + 1)
-			lem->team = 2;
 		lem->pid = fork();
-		if (lem-> pid < 0)
-			return (ft_mret("lemipc: fork() fail\n", 6));
-		if (!lem->pid) //child
+		if (lem->pid < 0)
+			return (ft_mret("lemipc: fork() fail\n", 11));
+		if (lem->pid) //parent
+			lem->pids[lem->player_id - 1] = lem->pid;
+		else
 			break;
+		lem->team = (lem->team == 1) ? (lem->team = 2) : (lem->team = 1);
 	}
 	if (lem->pid)
 	{
@@ -69,6 +69,8 @@ int	create_game(t_lem *lem)
 	if (lem->shm == MAP_FAILED)
 		return (5);
 	init_shm(lem);
+	lem->semid = sem_alloc();
+	sem_init(lem->semid);
 	ret = load_game(lem);
 	return (ret);
 }
