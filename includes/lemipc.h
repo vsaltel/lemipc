@@ -3,12 +3,15 @@
 
 # include <sys/mman.h>
 # include <signal.h>
+# include <time.h>
+# include <termios.h>
 
 # include "libft.h"
 
-# define MAX_PLAYER	10
-# define MAP_SIZE	6
-# define SEM_NAME	"lemipc_sem"
+# define BUFFER_SIZE	1024
+# define MAX_PLAYER		10
+# define MAP_SIZE		6
+# define SEM_NAME		"lemipc_sem"
 
 /*
 union semun
@@ -30,6 +33,7 @@ typedef struct s_shm
 typedef struct s_lem
 {
 	t_shm	*shm;
+	struct termios prev_term;
 	int		pids[MAX_PLAYER - 1];
 	int		semid;
 	int		main_player;	
@@ -51,6 +55,7 @@ void	init_lem(t_lem *lem);
 void	free_shm(t_shm *shm);
 void	*create_shared_memory(size_t size);
 void	catch_sigint(int signal);
+void	exit_free(t_lem *lem);
 
 /* display.c */
 void	display_map(t_lem *lem);
@@ -66,5 +71,11 @@ int		sem_alloc(void);
 int		sem_init(int semid);
 int		sem_wait(int semid);
 int		sem_post(int semid);
+
+/* control_mplayer.c */
+int		move_player(t_lem *lem, int move);
+void	control_player(t_lem *lem);
+int		init_shell_input(t_lem *lem);
+void	restore_shell_input(t_lem *lem);
 
 #endif

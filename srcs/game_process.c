@@ -34,7 +34,8 @@ int		main_player(t_lem *lem)
 		if (lem->shm->player_round == lem->player_id)
 		{
 			display_map(lem);
-			player_process(lem);
+			ft_printf("main=%d pos : y=%d i=%d\n", lem->player_id, lem->y, lem->i);	
+			control_player(lem);
 			if (++lem->shm->player_round > lem->nb_player)
 				lem->shm->player_round = 1;
 		}

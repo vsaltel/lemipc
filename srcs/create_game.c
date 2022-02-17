@@ -31,14 +31,39 @@ static void	init_shm(t_lem *lem)
 		while (++i < MAP_SIZE)
 			lem->shm->area[y][i] = 0;
 	}
-	lem->shm->player_round = 1;
+	lem->shm->player_round = lem->nb_player;
 	lem->shm->game_state = 1;
+}
+
+void	set_initial_position(t_lem *lem)
+{
+	int	i;
+	int	r;
+
+	i = 1;
+	while (i)
+	{
+		srand(time(NULL));
+		r = rand();
+		lem->y = (r >> (sizeof(int) * 8) / 2) % MAP_SIZE;
+		lem->i = (r << (sizeof(int) * 8) / 2) % MAP_SIZE;
+		if (lem->i < 0)
+			lem->i = -lem->i;
+		sem_wait(lem->semid);
+		if (!lem->shm->area[lem->y][lem->i])
+		{
+			lem->shm->area[lem->y][lem->i] = lem->team;
+			i = 0;
+		}
+		sem_post(lem->semid);
+	}
 }
 
 int	load_game(t_lem	*lem)
 {
 	while (++lem->player_id < lem->nb_player)
 	{
+		set_initial_position(lem);
 		lem->pid = fork();
 		if (lem->pid < 0)
 			return (ft_mret("lemipc: fork() fail\n", 11));
@@ -50,8 +75,10 @@ int	load_game(t_lem	*lem)
 	}
 	if (lem->pid)
 	{
+		set_initial_position(lem);
+		init_shell_input(lem);
 		main_player(lem);
-		free_shm(lem->shm);
+		exit_free(lem);
 	}
 	else
 		other_player(lem);

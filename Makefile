@@ -15,11 +15,12 @@ SRCDIR	=	srcs
 INCDIR	=	includes
 OBJDIR	=	objs
 
-FILES	=	main.c			\
-			create_game.c	\
-			semaphore.c		\
-			display.c		\
-			game_process.c	\
+FILES	=	main.c				\
+			create_game.c		\
+			control_mplayer.c	\
+			semaphore.c			\
+			display.c			\
+			game_process.c		\
 			utils.c
 
 SRCS	=	$(addprefix $(SRCDIR)/, $(FILES))

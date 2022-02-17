@@ -26,21 +26,29 @@ static void	kill_process(t_lem *lem)
 	}
 }
 
+void	free_shm(t_shm *shm)
+{
+	if (shm)
+		munmap(shm, sizeof(t_lem));
+}
+
+void	exit_free(t_lem *lem)
+{
+	kill_process(lem);
+	sem_destroy(lem->semid);
+	free_shm(lem->shm);
+	restore_shell_input(lem);
+	exit(0);
+}
+
 void	catch_sigint(int signal)
 {
 	if (lem.pid)
 	{
 		ft_dprintf(2, "lemipc: catch sig %d\n", signal);
-		kill_process(&lem);
-		sem_destroy(lem.semid);
+		exit_free(&lem);
 	}
 	exit(0);
-}
-
-void	free_shm(t_shm *shm)
-{
-	if (shm)
-		munmap(shm, sizeof(t_lem));
 }
 
 void	*create_shared_memory(size_t size)
