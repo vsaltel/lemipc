@@ -54,6 +54,7 @@ void	player(t_lem *lem)
 	first = lem->pid ? 1 : 0;
 	while (1)
 	{
+		ft_printf("there\n");
 		if (!first && receive_message(lem, &msgq))
 			break;
 		if (msgq.mesg_type == 1 || first)

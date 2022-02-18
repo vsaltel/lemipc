@@ -40,6 +40,8 @@ void	control_player(t_lem *lem)
 	while (1)
 	{
 		ret = read(0, buf, BUFFER_SIZE);
+		if (ret == -1)
+			exit_free(lem);
 		buf[ret] = '\0';
 		if (!ft_strncmp("\e[C", buf, 3) && !move_player(lem, RIGHT))
 			break;
@@ -50,7 +52,7 @@ void	control_player(t_lem *lem)
 		else if (!ft_strncmp("\e[B", buf, 3) && !move_player(lem, DOWN))
 			break;
 		else if (!ft_strncmp("\x03", buf, 1))
-			kill(getpid(), SIGINT);
+			exit_free(lem);
 		ft_dprintf(2, "lemipc: bad input or impossible move\n");
 	}
 	if (ret <= 0)

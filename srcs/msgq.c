@@ -46,6 +46,7 @@ int		receive_message(t_lem *lem, t_msgq *msgq)
 {
 	fd_set	rset;
 	int		ret;
+	char	buf[BUFF_SIZE];
 
  	FD_ZERO(&rset);
 	FD_SET(0, &rset);
@@ -55,6 +56,14 @@ int		receive_message(t_lem *lem, t_msgq *msgq)
 	{
 		ft_dprintf(2, "lemipc: select fail (id=%d)\n", lem->player_id);
 		return (1);
+	}
+	if (FD_ISSET(0, &rset))
+	{
+		ret = read(0, buf, BUFFER_SIZE);
+		if (ret == -1)
+			exit_free(lem);
+		if (!ft_strncmp("\x03", buf, 1))
+			exit_free(lem);
 	}
 	if (FD_ISSET(lem->msgqid, &rset))
 	{

@@ -35,6 +35,7 @@ static void	wait_child_die(t_lem *lem)
 	int	nb;
 	int	ret;
 
+	ft_printf("wait childs\n");
 	nb = 0;
     while (!lem->pids[nb] || nb > (MAX_PLAYER - 1))
     {
