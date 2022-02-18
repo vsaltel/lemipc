@@ -1,47 +1,74 @@
 #include "lemipc.h"
 
-void	player_process(t_lem *lem)
+static int		check_if_encircled(t_lem *lem)
 {
-	ft_printf("id=%d pos : y=%d i=%d\n", lem->player_id, lem->y, lem->i);	
-}
+	int	count;
+	int	other_team;
 
-int		other_player(t_lem *lem)
-{
-	while (1)
+	other_team = (lem->team == 1) ? 2 : 1;
+	count = 0;
+	if ((lem->i + 1) < MAP_SIZE && (lem->shm->area[lem->y][lem->i + 1]) == other_team)
+		count++;
+	if ((lem->i - 1) >= 0 && (lem->shm->area[lem->y][lem->i - 1]) == other_team)
+		count++;
+	if ((lem->y - 1) >= 0 && (lem->shm->area[lem->y - 1][lem->i]) == other_team)
+		count++;
+	if ((lem->y + 1) < MAP_SIZE && (lem->shm->area[lem->y + 1][lem->i]) == other_team)
+		count++;
+	if (count >= 2)
 	{
-		sem_wait(lem->semid);
-		if (!lem->shm->game_state)
-			break;
-		if (lem->shm->player_round == lem->player_id)
-		{
-			player_process(lem);	
-			if (++lem->shm->player_round > lem->nb_player)
-				lem->shm->player_round = 1;
-		}
-		sem_post(lem->semid);
+		lem->shm->area[lem->y][lem->i] = 0;
+		lem->alive = 0;
+		return (1);
 	}
 	return (0);
 }
 
-int		main_player(t_lem *lem)
+static int		player_turn(t_lem *lem)
 {
-	signal(SIGINT, &catch_sigint);
+	sem_wait(lem->semid);
+	if (!lem->shm->game_state)
+	{
+		sem_post(lem->semid);
+		return (1);
+	}
+	if (check_if_encircled(lem))
+	{
+		sem_post(lem->semid);
+		return (2);
+	}
+	if (lem->pid)
+		control_player(lem);
+	else
+		ft_printf("id=%d pos : y=%d i=%d\n", lem->player_id, lem->y, lem->i);
+	sem_post(lem->semid);
+	send_turn_msg(lem, lem->player_id + 1);
+	return (0);
+}
+
+void	player(t_lem *lem)
+{
+	t_msgq	msgq;
+	int		first;
+
+	first = lem->pid ? 1 : 0;
 	while (1)
 	{
-		sem_wait(lem->semid);
-		if (!lem->shm->game_state)
+		if (!first && receive_message(lem, &msgq))
 			break;
-		if (lem->shm->player_round == lem->player_id)
+		if (msgq.mesg_type == 1 || first)
 		{
-			display_map(lem);
-			ft_printf("main=%d pos : y=%d i=%d\n", lem->player_id, lem->y, lem->i);	
-			control_player(lem);
-			if (++lem->shm->player_round > lem->nb_player)
-				lem->shm->player_round = 1;
+			if (lem->pid)
+				display_map(lem);
+			if ((lem->alive && msgq.mes.nb == lem->player_id) || first)
+				if (player_turn(lem))
+					break;
 		}
-		//lem->shm->game_state = 0;
-		sem_post(lem->semid);
+		if (msgq.mesg_type == 2)
+		{
+			if (msgq.mes.nb < lem->player_id)
+				lem->player_id--;
+		}
+		first = 0;
 	}
-	sem_destroy(lem->semid);
-	return (0);
 }

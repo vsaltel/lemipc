@@ -31,7 +31,6 @@ static void	init_shm(t_lem *lem)
 		while (++i < MAP_SIZE)
 			lem->shm->area[y][i] = 0;
 	}
-	lem->shm->player_round = lem->nb_player;
 	lem->shm->game_state = 1;
 }
 
@@ -71,17 +70,19 @@ int	load_game(t_lem	*lem)
 			lem->pids[lem->player_id - 1] = lem->pid;
 		else
 			break;
-		lem->team = (lem->team == 1) ? (lem->team = 2) : (lem->team = 1);
+		lem->team = (lem->team == 1) ? 2 : 1;
 	}
 	if (lem->pid)
 	{
+		signal(SIGINT, &catch_sigint);
 		set_initial_position(lem);
 		init_shell_input(lem);
-		main_player(lem);
+		send_turn_msg(lem, lem->player_id);
+		player(lem);
 		exit_free(lem);
 	}
 	else
-		other_player(lem);
+		player(lem);
 	return (0);
 }
 
@@ -98,6 +99,7 @@ int	create_game(t_lem *lem)
 	init_shm(lem);
 	lem->semid = sem_alloc();
 	sem_init(lem->semid);
+	join_msgq(lem);
 	ret = load_game(lem);
 	return (ret);
 }

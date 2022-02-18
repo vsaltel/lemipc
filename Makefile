@@ -19,6 +19,7 @@ FILES	=	main.c				\
 			create_game.c		\
 			control_mplayer.c	\
 			semaphore.c			\
+			msgq.c				\
 			display.c			\
 			game_process.c		\
 			utils.c

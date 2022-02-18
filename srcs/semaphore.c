@@ -1,6 +1,7 @@
+# include "lemipc.h"
+# include <sys/types.h>
 # include <sys/ipc.h>
 # include <sys/sem.h>
-# include <sys/types.h>
 
 int		sem_alloc(void)
 {
@@ -19,7 +20,7 @@ int		sem_destroy(int semid)
 
 int		sem_init(int semid)
 {
-	union semun		argument;
+	union semun_u	argument;
 	unsigned short	values[1];
 
 	values[0] = 1;

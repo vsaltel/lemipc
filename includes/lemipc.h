@@ -12,21 +12,32 @@
 # define MAX_PLAYER		10
 # define MAP_SIZE		6
 # define SEM_NAME		"lemipc_sem"
+# define MSGQ_NAME		"lemipc_msg"
 
-/*
-union semun
+union semun_u
 {
-	int					val;
-	struct semid_ds		*buf;
-	unsigned short int	*array;
-	struct seminfo		*%%__%%buf;
+	int				val;
+	struct semid_ds	*buf;
+	unsigned short	*array;
+	struct seminfo	*__buf;
 };
-*/
+
+typedef struct s_msgt
+{
+	int		nb;
+	int		x;
+	int		y;
+}				t_msgt;
+
+typedef struct s_msgq
+{
+    long	mesg_type;
+	t_msgt	mes;
+}				t_msgq;
 
 typedef struct s_shm
 {
 	int		area[MAP_SIZE][MAP_SIZE];
-	int		player_round;
 	int		game_state;
 }				t_shm;
 
@@ -34,8 +45,10 @@ typedef struct s_lem
 {
 	t_shm	*shm;
 	struct termios prev_term;
+    int		msgqid;
 	int		pids[MAX_PLAYER - 1];
 	int		semid;
+	int		alive;
 	int		main_player;	
 	int		nb_player;
 	int		player_id;
@@ -55,15 +68,14 @@ void	init_lem(t_lem *lem);
 void	free_shm(t_shm *shm);
 void	*create_shared_memory(size_t size);
 void	catch_sigint(int signal);
+void	catch_sigchld(int signal);
 void	exit_free(t_lem *lem);
 
 /* display.c */
 void	display_map(t_lem *lem);
 
 /* game_process.c */
-int		main_player(t_lem *lem);
-int		other_player(t_lem *lem);
-void	player_process(t_lem *lem);
+void	player(t_lem *lem);
 
 /* semaphore.c */
 int		sem_destroy(int semid);
@@ -77,5 +89,12 @@ int		move_player(t_lem *lem, int move);
 void	control_player(t_lem *lem);
 int		init_shell_input(t_lem *lem);
 void	restore_shell_input(t_lem *lem);
+
+/* msgq.c */
+int		join_msgq(t_lem *lem);
+int		free_msgq(t_lem *lem);
+int		send_die_msg(t_lem *lem);
+int		send_turn_msg(t_lem *lem, int id);
+int		receive_message(t_lem *lem, t_msgq *msgq);
 
 #endif
