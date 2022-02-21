@@ -1,24 +1,5 @@
 #include "lemipc.h"
 
-static int	get_nb_player(t_lem *lem)
-{
-	char	*input;
-
-	lem->main_player = 1;
-	ft_printf("Number of players (multiple of 2): ");
-	if (get_next_line(0, &input) < 0)
-		return (1);
-	lem->nb_player = ft_atoi(input);
-	free(input);
-	if (lem->nb_player <= 0)
-		return (ft_mret("lemipc: No player\n", 2));
-	if (lem->nb_player % 2)
-		return (ft_mret("lemipc: Not a multiple of 2\n", 3));
-	if (lem->nb_player > MAX_PLAYER)
-		return (ft_mret("lemipc: to many players\n", 4));
-	return (0);
-}
-
 static void	init_shm(t_lem *lem)
 {
 	int		i;
@@ -34,7 +15,7 @@ static void	init_shm(t_lem *lem)
 	lem->shm->game_state = 1;
 }
 
-void	set_initial_position(t_lem *lem)
+static void	set_initial_position(t_lem *lem)
 {
 	int	i;
 	int	r;
@@ -58,48 +39,24 @@ void	set_initial_position(t_lem *lem)
 	}
 }
 
-int	load_game(t_lem	*lem)
+static void	load_game(t_lem	*lem)
 {
-	while (++lem->player_id < lem->nb_player)
-	{
-		set_initial_position(lem);
-		lem->pid = fork();
-		if (lem->pid < 0)
-			return (ft_mret("lemipc: fork() fail\n", 11));
-		if (lem->pid) //parent
-			lem->pids[lem->player_id - 1] = lem->pid;
-		else
-			break;
-		lem->team = (lem->team == 1) ? 2 : 1;
-	}
-	if (lem->pid)
-	{
-		signal(SIGINT, &catch_sigint);
-		set_initial_position(lem);
-		init_shell_input(lem);
-		send_turn_msg(lem, lem->player_id);
-		player(lem);
+	signal(SIGINT, &catch_sigint);
+	set_initial_position(lem);
+	player(lem);
+	if (check_if_last(lem))
 		exit_free(lem);
-	}
-	else
-		player(lem);
 	return (0);
 }
 
 int	create_game(t_lem *lem)
 {
-	int	ret;	
-
-	ret = 0;
-	if ((ret = get_nb_player(lem)))
-		return (ret);
-	lem->shm = create_shared_memory(sizeof(t_shm));
-	if (lem->shm == MAP_FAILED)
-		return (5);
+	create_shared_memory(lem);
 	init_shm(lem);
-	lem->semid = sem_alloc();
+	sem_alloc(lem);
 	sem_init(lem->semid);
 	join_msgq(lem);
-	ret = load_game(lem);
-	return (ret);
+	ft_dprintf(2, "msgid %d\n", lem->msgqid);
+	load_game(lem);
+	return (0);
 }

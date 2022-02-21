@@ -3,18 +3,20 @@
 # include <sys/ipc.h>
 # include <sys/sem.h>
 
-int		sem_alloc(void)
+int		sem_alloc(t_lem *lem)
 {
-	int	sem_flags;
-
-	sem_flags = IPC_CREAT;
-	return (semget(IPC_PRIVATE, 1, sem_flags));
+	if ((lem->semid = semget(IPC_PRIVATE, 1, 0)) == ENOENT)
+		lem->semid = semget(IPC_PRIVATE, 1, IPC_CREAT);
+	if (lem->semid == -1)
+	{
+		perror("semget");
+		exit(2);
+	}
+	return (lem->semid);
 }
 
 int		sem_destroy(int semid)
 {
-	//union semun	ignored_argument;
-
 	return (semctl(semid, 1, IPC_RMID, 0));
 }
 

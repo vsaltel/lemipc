@@ -20,6 +20,7 @@ FILES	=	main.c				\
 			control_mplayer.c	\
 			semaphore.c			\
 			msgq.c				\
+			shm.c				\
 			display.c			\
 			game_process.c		\
 			utils.c

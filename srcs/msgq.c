@@ -9,9 +9,14 @@ int	join_msgq(t_lem *lem)
     int key;
   
     key = ftok(MSGQ_NAME, 65);
-    if ((lem->msgqid = msgget(key, 0666 | IPC_CREAT)) < 0)
-		return (1);
-	return (0);
+    if ((lem->msgqid = msgget(key, 0644)) == ENOENT)
+    	lem->msgqid = msgget(key, 0644 | IPC_CREAT);
+	if (lem->msgqid == -1)
+	{
+		perror("msgget");
+		exit(3);
+	}
+	return (lem->msgqid);
 }
 
 int	free_msgq(t_lem *lem)
@@ -39,36 +44,13 @@ int	send_turn_msg(t_lem *lem, int id)
 		msgq.mes.nb = 1;
 	else
 		msgq.mes.nb = id;
+	ft_printf("next id = %d\n", msgq.mes.nb);
 	return (msgsnd(lem->msgqid, &msgq, sizeof(msgq.mes), 0));
 }
 
 int		receive_message(t_lem *lem, t_msgq *msgq)
 {
-	fd_set	rset;
-	int		ret;
-	char	buf[BUFF_SIZE];
-
- 	FD_ZERO(&rset);
-	FD_SET(0, &rset);
-	FD_SET(lem->msgqid, &rset);
-	ret = select(lem->msgqid + 1, &rset, NULL, NULL, NULL);
-	if (ret == -1)
-	{
-		ft_dprintf(2, "lemipc: select fail (id=%d)\n", lem->player_id);
+	if (msgrcv(lem->msgqid, msgq, sizeof(msgq->mes), 0, 0) == -1)
 		return (1);
-	}
-	if (FD_ISSET(0, &rset))
-	{
-		ret = read(0, buf, BUFFER_SIZE);
-		if (ret == -1)
-			exit_free(lem);
-		if (!ft_strncmp("\x03", buf, 1))
-			exit_free(lem);
-	}
-	if (FD_ISSET(lem->msgqid, &rset))
-	{
-		msgrcv(lem->msgqid, msgq, sizeof(msgq->mes), 0, 0);
-		return (2);
-	}	
 	return (0);
 }

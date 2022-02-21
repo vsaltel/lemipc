@@ -13,6 +13,7 @@
 # define MAP_SIZE		6
 # define SEM_NAME		"lemipc_sem"
 # define MSGQ_NAME		"lemipc_msg"
+# define SHM_NAME		"lemipc_shm"
 
 union semun_u
 {
@@ -44,15 +45,12 @@ typedef struct s_shm
 typedef struct s_lem
 {
 	t_shm	*shm;
-	struct termios prev_term;
     int		msgqid;
-	int		pids[MAX_PLAYER - 1];
 	int		semid;
+	int		shmid;
 	int		alive;
 	int		main_player;	
 	int		nb_player;
-	int		player_id;
-	int		pid;
 	int		team;
 	int		y;
 	int		i;
@@ -65,10 +63,7 @@ int		create_game(t_lem *lem);
 
 /* utils.c */
 void	init_lem(t_lem *lem);
-void	free_shm(t_shm *shm);
-void	*create_shared_memory(size_t size);
 void	catch_sigint(int signal);
-void	catch_sigchld(int signal);
 void	exit_free(t_lem *lem);
 
 /* display.c */
@@ -79,7 +74,7 @@ void	player(t_lem *lem);
 
 /* semaphore.c */
 int		sem_destroy(int semid);
-int		sem_alloc(void);
+int		sem_alloc(t_lem *lem);
 int		sem_init(int semid);
 int		sem_wait(int semid);
 int		sem_post(int semid);
@@ -96,5 +91,9 @@ int		free_msgq(t_lem *lem);
 int		send_die_msg(t_lem *lem);
 int		send_turn_msg(t_lem *lem, int id);
 int		receive_message(t_lem *lem, t_msgq *msgq);
+
+/* shm.c */
+void	*create_shared_memory(t_lem *lem);
+void	free_shm(t_shm *shm);
 
 #endif
