@@ -1,4 +1,3 @@
-#include <sys/select.h>
 #include <sys/types.h>
 #include <sys/ipc.h>
 #include <sys/msg.h>
@@ -8,9 +7,17 @@ int	join_msgq(t_lem *lem)
 {
     int key;
   
-    key = ftok(MSGQ_NAME, 65);
-    if ((lem->msgqid = msgget(key, 0644)) == ENOENT)
+    //key = ftok(MSGQ_NAME, 65);
+    if ((key = ftok("/tmp", 65)) == -1)
+	{
+		perror("ftok");
+		exit(1);
+	}
+	lem->msgqid = msgget(key, 0);
+    if (errno == ENOENT)
+	{
     	lem->msgqid = msgget(key, 0644 | IPC_CREAT);
+	}
 	if (lem->msgqid == -1)
 	{
 		perror("msgget");
@@ -31,7 +38,6 @@ int	send_die_msg(t_lem *lem)
 	t_msgq	msgq;
 
 	msgq.mesg_type = 2;
-	msgq.mes.nb = lem->player_id;
 	return (msgsnd(lem->msgqid, &msgq, sizeof(msgq.mes), 0));
 }
 

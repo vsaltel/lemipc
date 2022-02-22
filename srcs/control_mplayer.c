@@ -1,7 +1,5 @@
 #include "lemipc.h"
 
-enum control {UP, DOWN, LEFT, RIGHT};
-
 int		move_player(t_lem *lem, int move)
 {
 	if (move == RIGHT && (lem->i + 1) < MAP_SIZE && !(lem->shm->area[lem->y][lem->i + 1]))
@@ -59,6 +57,7 @@ void	control_player(t_lem *lem)
 		exit_free(lem);
 }
 
+/*
 int		init_shell_input(t_lem *lem)
 {
 	struct termios term;
@@ -81,3 +80,4 @@ void		restore_shell_input(t_lem *lem)
 		return ;
 	tcsetattr(0, TCSANOW, &(lem->prev_term));
 }
+*/

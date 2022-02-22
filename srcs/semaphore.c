@@ -5,8 +5,16 @@
 
 int		sem_alloc(t_lem *lem)
 {
-	if ((lem->semid = semget(IPC_PRIVATE, 1, 0)) == ENOENT)
-		lem->semid = semget(IPC_PRIVATE, 1, IPC_CREAT);
+	int key;
+
+	if ((key = ftok("/tmp", 65)) == -1)
+	{
+		perror("ftok");
+		exit(1);
+	}
+	lem->semid = semget(key, 1, 0);
+	if (errno == ENOENT)
+		lem->semid = semget(key, 1, 0666 | IPC_CREAT);
 	if (lem->semid == -1)
 	{
 		perror("semget");
@@ -15,9 +23,14 @@ int		sem_alloc(t_lem *lem)
 	return (lem->semid);
 }
 
-int		sem_destroy(int semid)
+int		sem_destroy(t_lem *lem)
 {
-	return (semctl(semid, 1, IPC_RMID, 0));
+	int ret;
+
+	ret = semctl(lem->semid, 1, IPC_RMID, 0);
+	if (ret == -1)
+		perror("semctl");
+	return (ret);
 }
 
 int		sem_init(int semid)

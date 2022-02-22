@@ -18,6 +18,7 @@ OBJDIR	=	objs
 FILES	=	main.c				\
 			create_game.c		\
 			control_mplayer.c	\
+			game_utils.c		\
 			semaphore.c			\
 			msgq.c				\
 			shm.c				\
