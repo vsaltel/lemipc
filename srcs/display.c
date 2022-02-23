@@ -2,18 +2,18 @@
 
 void	display_map(t_lem *lem)
 {
-	int		i;
+	int		x;
 	int		y;
 	char	c;
 
 	y = -1;
 	while (++y < MAP_SIZE)
 	{
-		i = -1;
-		while (++i < MAP_SIZE)
+		x = -1;
+		while (++x < MAP_SIZE)
 		{
-			c = '0' + lem->shm->area[y][i];
-			if (lem->alive && y == lem->y && i == lem->i)
+			c = '0' + lem->shm->area[y][x];
+			if (lem->alive && y == lem->y && x == lem->x)
 				ft_printf("\033[0;31m%c\033[0m", c);	
 			else
 				write(1, &c, 1);

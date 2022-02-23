@@ -16,8 +16,11 @@ int	join_msgq(t_lem *lem)
 	lem->msgqid = msgget(key, 0);
     if (errno == ENOENT)
 	{
-    	lem->msgqid = msgget(key, 0644 | IPC_CREAT);
+		ft_printf("msgq create\n");
+    	lem->msgqid = msgget(key, 0666 | IPC_CREAT);
 	}
+	else
+		ft_printf("msgq join\n");
 	if (lem->msgqid == -1)
 	{
 		perror("msgget");
@@ -33,30 +36,35 @@ int	free_msgq(t_lem *lem)
 	return (0);
 }
 
-int	send_die_msg(t_lem *lem)
+int	send_target_msg(t_lem *lem, int y, int x)
 {
 	t_msgq	msgq;
+	int		nb;
+	int		ret;
 
-	msgq.mesg_type = 2;
-	return (msgsnd(lem->msgqid, &msgq, sizeof(msgq.mes), 0));
-}
-
-int	send_turn_msg(t_lem *lem, int id)
-{
-	t_msgq	msgq;
-
-	msgq.mesg_type = 1;
-	if (id > lem->nb_player)
-		msgq.mes.nb = 1;
-	else
-		msgq.mes.nb = id;
-	ft_printf("next id = %d\n", msgq.mes.nb);
-	return (msgsnd(lem->msgqid, &msgq, sizeof(msgq.mes), 0));
+	msgq.mes.x = x;
+	msgq.mes.y = y;
+	msgq.mesg_type = lem->team;
+	nb = check_nb_player_team(lem) - 1;
+	ft_printf("send %d\n", nb);
+	while (--nb > 0)
+		if ((ret = msgsnd(lem->msgqid, &msgq, sizeof(msgq.mes), 0)) == -1)
+			break;
+	if (ret == -1)
+		perror("msgsnd");
+	return (ret);
 }
 
 int		receive_message(t_lem *lem, t_msgq *msgq)
 {
-	if (msgrcv(lem->msgqid, msgq, sizeof(msgq->mes), 0, 0) == -1)
-		return (1);
-	return (0);
+	int	ret;
+
+	ft_printf("recv bef\n");
+	ret = msgrcv(lem->msgqid, msgq, sizeof(msgq->mes), 0, IPC_NOWAIT);
+	if (ret == -1 && errno != ENOMSG)
+		perror("msgrcv");
+	if (ret == -1)
+		return (0);
+	ft_printf("recv aft %d\n", msgq->mesg_type);
+	return (1);
 }

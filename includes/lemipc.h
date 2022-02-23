@@ -31,7 +31,6 @@ union semun_u
 
 typedef struct s_msgt
 {
-	int		nb;
 	int		x;
 	int		y;
 }				t_msgt;
@@ -60,7 +59,7 @@ typedef struct s_lem
 	int		nb_team;
 	int		team;
 	int		y;
-	int		i;
+	int		x;
 }				t_lem;
 
 extern t_lem	lem;
@@ -88,11 +87,14 @@ int		sem_post(int semid);
 
 /* control_mplayer.c */
 int		move_player(t_lem *lem, int move);
+void	move_to_target(t_lem *lem, int dy, int dx);
 void	control_player(t_lem *lem);
 //int		init_shell_input(t_lem *lem);
 //void	restore_shell_input(t_lem *lem);
 
 /* game_utils.c */
+int		check_nearly_ennemi(t_lem *lem, int *dy, int *dx);
+int		check_nb_player_team(t_lem *lem);
 int		check_if_last_team(t_lem *lem);
 int		check_nb_player(t_lem *lem);
 int		check_if_empty(t_lem *lem);
@@ -101,8 +103,7 @@ int		check_if_encircled(t_lem *lem);
 /* msgq.c */
 int		join_msgq(t_lem *lem);
 int		free_msgq(t_lem *lem);
-int		send_die_msg(t_lem *lem);
-int		send_turn_msg(t_lem *lem, int id);
+int		send_target_msg(t_lem *lem, int y, int x);
 int		receive_message(t_lem *lem, t_msgq *msgq);
 
 /* shm.c */

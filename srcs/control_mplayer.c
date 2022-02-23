@@ -2,31 +2,63 @@
 
 int		move_player(t_lem *lem, int move)
 {
-	if (move == RIGHT && (lem->i + 1) < MAP_SIZE && !(lem->shm->area[lem->y][lem->i + 1]))
+	if (move == RIGHT && (lem->x + 1) < MAP_SIZE && !(lem->shm->area[lem->y][lem->x + 1]))
 	{
-			lem->shm->area[lem->y][lem->i] = 0;
-			lem->shm->area[lem->y][++(lem->i)] = lem->team;
+			lem->shm->area[lem->y][lem->x] = 0;
+			lem->shm->area[lem->y][++(lem->x)] = lem->team;
 			return (0);
 	}
-	else if (move == LEFT && (lem->i - 1) >= 0 && !(lem->shm->area[lem->y][lem->i - 1]))
+	else if (move == LEFT && (lem->x - 1) >= 0 && !(lem->shm->area[lem->y][lem->x - 1]))
 	{
-			lem->shm->area[lem->y][lem->i] = 0;
-			lem->shm->area[lem->y][--(lem->i)] = lem->team;
+			lem->shm->area[lem->y][lem->x] = 0;
+			lem->shm->area[lem->y][--(lem->x)] = lem->team;
 			return (0);
 	}
-	else if (move == UP && (lem->y - 1) >= 0 && !(lem->shm->area[lem->y - 1][lem->i]))
+	else if (move == UP && (lem->y - 1) >= 0 && !(lem->shm->area[lem->y - 1][lem->x]))
 	{
-			lem->shm->area[lem->y][lem->i] = 0;
-			lem->shm->area[--(lem->y)][lem->i] = lem->team;
+			lem->shm->area[lem->y][lem->x] = 0;
+			lem->shm->area[--(lem->y)][lem->x] = lem->team;
 			return (0);
 	}
-	else if (move == DOWN && (lem->y + 1) < MAP_SIZE && !(lem->shm->area[lem->y + 1][lem->i]))
+	else if (move == DOWN && (lem->y + 1) < MAP_SIZE && !(lem->shm->area[lem->y + 1][lem->x]))
 	{
-			lem->shm->area[lem->y][lem->i] = 0;
-			lem->shm->area[++(lem->y)][lem->i] = lem->team;
+			lem->shm->area[lem->y][lem->x] = 0;
+			lem->shm->area[++(lem->y)][lem->x] = lem->team;
 			return (0);
 	}
 	return (1);
+}
+
+void	move_to_target(t_lem *lem, int dy, int dx)
+{
+	int ret;
+
+	ft_printf("move to target : %d %d\n", dy, dx);
+	ret = 1;
+	if (dy > lem->y)
+	{
+		ft_printf("go down\n");
+		ret = move_player(lem, DOWN);
+	}
+	else if (dy < lem->y)
+	{
+		ft_printf("go up\n");
+		ret = move_player(lem, UP);
+	}
+	else if (dx > lem->x)
+	{
+		ft_printf("go right\n");
+		ret = move_player(lem, RIGHT);
+	}
+	else if (dx < lem->x)
+	{
+		ft_printf("go left\n");
+		ret = move_player(lem, LEFT);
+	}
+	if (ret)
+		if (move_player(lem, RIGHT))
+			if (lem->x + 1 != dx)
+				move_player(lem, LEFT);
 }
 
 void	control_player(t_lem *lem)

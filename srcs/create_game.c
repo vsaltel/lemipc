@@ -2,21 +2,21 @@
 
 static void	init_shm(t_lem *lem)
 {
-	int		i;
+	int		x;
 	int		y;
 
 	y = -1;
 	while (++y < MAP_SIZE)
 	{
-		i = -1;
-		while (++i < MAP_SIZE)
-			lem->shm->area[y][i] = 0;
+		x = -1;
+		while (++x < MAP_SIZE)
+			lem->shm->area[y][x] = 0;
 	}
 }
 
 static void	set_team(t_lem *lem)
 {
-	int i;
+	int x;
 	int y;
 	int	t;
 	int	pt;
@@ -32,9 +32,9 @@ static void	set_team(t_lem *lem)
 		y = -1;
 		while (++y < MAP_SIZE)
 		{
-			i = -1;
-			while (++i < MAP_SIZE)
-				if (lem->shm->area[y][i] == t)
+			x = -1;
+			while (++x < MAP_SIZE)
+				if (lem->shm->area[y][x] == t)
 				 nb++;
 		}
 		if (nb < nb_bef)
@@ -56,13 +56,13 @@ static void	set_initial_position(t_lem *lem)
 		srand(time(NULL));
 		r = rand();
 		lem->y = (r >> (sizeof(int) * 8) / 2) % MAP_SIZE;
-		lem->i = (r << (sizeof(int) * 8) / 2) % MAP_SIZE;
-		if (lem->i < 0)
-			lem->i = -lem->i;
-		if (!lem->shm->area[lem->y][lem->i])
+		lem->x = (r << (sizeof(int) * 8) / 2) % MAP_SIZE;
+		if (lem->x < 0)
+			lem->x = -lem->x;
+		if (!lem->shm->area[lem->y][lem->x])
 		{
 			sem_wait(lem->semid);
-			lem->shm->area[lem->y][lem->i] = lem->team;
+			lem->shm->area[lem->y][lem->x] = lem->team;
 			sem_post(lem->semid);
 			break;
 		}
@@ -84,7 +84,7 @@ static void	wait_players(t_lem *lem)
 		if (tmp != nb)
 		{
 			nb = tmp;
-			ft_printf("Waiting players : %d\n", nb);
+			ft_printf("Waiting players : %d/%d\n", nb, WAIT_PLAYER);
 		}
 		usleep(100);
 	}
@@ -95,12 +95,8 @@ static void	load_game(t_lem	*lem)
 	signal(SIGINT, &catch_sigint);
 	set_team(lem);
 	set_initial_position(lem);
-	ft_printf("pos %d %d\n", lem->y, lem->i);
 	wait_players(lem);
 	player(lem);
-	sem_wait(lem->semid);
-	lem->shm->area[lem->y][lem->i] = 0;
-	sem_post(lem->semid);
 	if (check_if_empty(lem))
 		exit_free(lem);
 }

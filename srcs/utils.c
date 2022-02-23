@@ -26,7 +26,7 @@ void	catch_sigint(int signal)
 {
 	ft_dprintf(2, "lemipc: catch sig %d\n", signal);
 	sem_wait(lem.semid);
-	lem.shm->area[lem.y][lem.i] = 0;
+	lem.shm->area[lem.y][lem.x] = 0;
 	sem_post(lem.semid);
 	if (check_if_empty(&lem))
 		exit_free(&lem);
