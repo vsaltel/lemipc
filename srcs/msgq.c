@@ -31,9 +31,7 @@ int	join_msgq(t_lem *lem)
 
 int	free_msgq(t_lem *lem)
 {
-	if (lem->msgqid > 0)
-		return (msgctl(lem->msgqid, IPC_RMID, NULL));
-	return (0);
+	return (msgctl(lem->msgqid, IPC_RMID, NULL));
 }
 
 int	send_target_msg(t_lem *lem, int y, int x)
@@ -44,9 +42,9 @@ int	send_target_msg(t_lem *lem, int y, int x)
 
 	msgq.mes.x = x;
 	msgq.mes.y = y;
+	msgq.mes.pid = lem->pid;
 	msgq.mesg_type = lem->team;
-	nb = check_nb_player_team(lem) - 1;
-	ft_printf("send %d\n", nb);
+	nb = check_nb_player_team(lem, lem->team) + 1;
 	while (--nb > 0)
 		if ((ret = msgsnd(lem->msgqid, &msgq, sizeof(msgq.mes), 0)) == -1)
 			break;
@@ -59,12 +57,11 @@ int		receive_message(t_lem *lem, t_msgq *msgq)
 {
 	int	ret;
 
-	ft_printf("recv bef\n");
-	ret = msgrcv(lem->msgqid, msgq, sizeof(msgq->mes), 0, IPC_NOWAIT);
+	msgq->mes.x = -1;
+	ret = msgrcv(lem->msgqid, msgq, sizeof(msgq->mes), 0, IPC_NOWAIT | MSG_NOERROR);
 	if (ret == -1 && errno != ENOMSG)
 		perror("msgrcv");
-	if (ret == -1)
+	if (msgq->mes.x == -1)
 		return (0);
-	ft_printf("recv aft %d\n", msgq->mesg_type);
 	return (1);
 }

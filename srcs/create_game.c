@@ -1,59 +1,36 @@
 #include "lemipc.h"
 
-static void	init_shm(t_lem *lem)
-{
-	int		x;
-	int		y;
-
-	y = -1;
-	while (++y < MAP_SIZE)
-	{
-		x = -1;
-		while (++x < MAP_SIZE)
-			lem->shm->area[y][x] = 0;
-	}
-}
-
 static void	set_team(t_lem *lem)
 {
-	int x;
-	int y;
-	int	t;
-	int	pt;
-	int	nb;
-	int	nb_bef;
+	int team;
+	int	count;
+	int	count_tmp;
+	int	i;
 
-	nb_bef = MAX_PLAYER;
-	pt = 1;
-	t = 0;
-	while (++t <= lem->nb_team)
+	team = 1;
+	count = check_nb_player_team(lem, 1);
+	i = 1;
+	while (++i <= lem->nb_team)
 	{
-		nb = 0;
-		y = -1;
-		while (++y < MAP_SIZE)
+		count_tmp = check_nb_player_team(lem, i);
+		if (count_tmp < count)
 		{
-			x = -1;
-			while (++x < MAP_SIZE)
-				if (lem->shm->area[y][x] == t)
-				 nb++;
-		}
-		if (nb < nb_bef)
-		{
-			nb_bef = nb;
-			pt = t;
+			team = i;
+			count = count_tmp;
 		}
 	}
-	lem->team = pt;
-	ft_printf("Team : %d\n", pt);
+	lem->team = team;
+	ft_printf("Team : %d\n", lem->team);
 }
 
 static void	set_initial_position(t_lem *lem)
 {
 	int	r;
 
+	r = 0;
 	while (1)
 	{
-		srand(time(NULL));
+		srand((time(NULL) * lem->pid) + r);
 		r = rand();
 		lem->y = (r >> (sizeof(int) * 8) / 2) % MAP_SIZE;
 		lem->x = (r << (sizeof(int) * 8) / 2) % MAP_SIZE;
@@ -79,24 +56,30 @@ static void	wait_players(t_lem *lem)
 	nb = 0;
 	while (1)
 	{
-		if ((tmp = check_nb_player(lem)) >= WAIT_PLAYER)
+		tmp = check_nb_player(lem);
+		if (tmp >= WAIT_PLAYER)
 			break;
 		if (tmp != nb)
 		{
 			nb = tmp;
 			ft_printf("Waiting players : %d/%d\n", nb, WAIT_PLAYER);
 		}
-		usleep(100);
+		usleep(30);
 	}
 }
 
 static void	load_game(t_lem	*lem)
 {
 	signal(SIGINT, &catch_sigint);
+	if (lem->c)
+		init_shell_input(lem);
 	set_team(lem);
 	set_initial_position(lem);
 	wait_players(lem);
+	usleep(100);
 	player(lem);
+	if (lem->c)
+		restore_shell_input(lem);
 	if (check_if_empty(lem))
 		exit_free(lem);
 }

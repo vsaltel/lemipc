@@ -25,12 +25,7 @@ int		sem_alloc(t_lem *lem)
 
 int		sem_destroy(t_lem *lem)
 {
-	int ret;
-
-	ret = semctl(lem->semid, 1, IPC_RMID, 0);
-	if (ret == -1)
-		perror("semctl");
-	return (ret);
+	return (semctl(lem->semid, 1, IPC_RMID, 0));
 }
 
 int		sem_init(int semid)
@@ -45,20 +40,26 @@ int		sem_init(int semid)
 
 int		sem_wait(int semid)
 {
-	struct sembuf operations[1];
+	struct sembuf	operations[1];
+	int				ret;
 
 	operations[0].sem_num = 0;
 	operations[0].sem_op = -1;
 	operations[0].sem_flg = SEM_UNDO;
-	return (semop(semid, operations, 1));
+	ret = semop(semid, operations, 1);
+	lem.sem_taken = 1;
+	return (ret);
 }
 
 int		sem_post(int semid)
 {
-	struct sembuf operations[1];
+	struct sembuf	operations[1];
+	int				ret;
 
 	operations[0].sem_num = 0;
 	operations[0].sem_op = 1;
 	operations[0].sem_flg = SEM_UNDO;
-	return (semop(semid, operations, 1));
+	ret = semop(semid, operations, 1);
+	lem.sem_taken = 0;
+	return (ret);
 }

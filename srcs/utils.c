@@ -4,18 +4,27 @@
 void	init_lem(t_lem *lem)
 {
 	lem->shm = NULL;
-	lem->main_player = 0;
-	lem->nb_player = 0;
 	lem->creator = 0;
-	lem->nb_team = 2;
+	if ((lem->nb_team = NB_TEAM) < 2)
+		lem->nb_team = 2;
 	lem->team = 2;
 	lem->alive = 1;
 	lem->msgqid = -1;
+	lem->sem_taken = 0;
+	lem->v = 0;
+	lem->c = 0;
+	lem->pid = getpid();
+}
+
+void	free_space(t_lem *lem)
+{
+	sem_wait(lem->semid);
+	lem->shm->area[lem->y][lem->x] = 0;
+	sem_post(lem->semid);
 }
 
 void	exit_free(t_lem *lem)
 {
-	ft_printf("free all\n");
 	free_msgq(lem);
 	sem_destroy(lem);
 	free_shm(lem);
@@ -25,9 +34,11 @@ void	exit_free(t_lem *lem)
 void	catch_sigint(int signal)
 {
 	ft_dprintf(2, "lemipc: catch sig %d\n", signal);
-	sem_wait(lem.semid);
-	lem.shm->area[lem.y][lem.x] = 0;
-	sem_post(lem.semid);
+	if (lem.sem_taken)
+		sem_post(lem.semid);
+	free_space(&lem);
+	if (lem.c)
+		restore_shell_input(&lem);
 	if (check_if_empty(&lem))
 		exit_free(&lem);
 	exit(0);

@@ -7,6 +7,7 @@ void	display_map(t_lem *lem)
 	char	c;
 
 	y = -1;
+	sem_wait(lem->semid);
 	while (++y < MAP_SIZE)
 	{
 		x = -1;
@@ -22,4 +23,5 @@ void	display_map(t_lem *lem)
 		write(1, "\n", 1);
 	}
 	write(1, "\n", 1);
+	sem_post(lem->semid);
 }

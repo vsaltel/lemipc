@@ -27,12 +27,21 @@ void	*create_shared_memory(t_lem *lem)
 	return (lem->shm);
 }
 
-int	free_shm(t_lem *lem)
+int		free_shm(t_lem *lem)
 {
-	int	ret;
+	return (shmctl(lem->shmid, IPC_RMID, 0));
+}
 
-	ret = shmctl(lem->shmid, IPC_RMID, 0);
-	if (ret == -1)
-		perror("shmctl");
-	return (ret);
+void	init_shm(t_lem *lem)
+{
+	int		x;
+	int		y;
+
+	y = -1;
+	while (++y < MAP_SIZE)
+	{
+		x = -1;
+		while (++x < MAP_SIZE)
+			lem->shm->area[y][x] = 0;
+	}
 }

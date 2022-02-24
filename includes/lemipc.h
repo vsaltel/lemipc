@@ -11,15 +11,12 @@
 # include "libft.h"
 
 # define BUFFER_SIZE	1024
-# define MAX_PLAYER		10
-# define MAP_SIZE		6
-# define NB_TEAM		2
-# define WAIT_PLAYER	4
-# define SEM_NAME		"lemipc_sem"
-# define MSGQ_NAME		"lemipc_msg"
-# define SHM_NAME		"lemipc_shm"
+# define MAP_SIZE		10
+# define NB_TEAM		3
+# define WAIT_PLAYER	6
+# define SLEEP_VALUE	1
 
-enum control {UP, DOWN, LEFT, RIGHT};
+enum control {UP, LEFT, DOWN, RIGHT};
 
 union semun_u
 {
@@ -31,6 +28,7 @@ union semun_u
 
 typedef struct s_msgt
 {
+	int		pid;
 	int		x;
 	int		y;
 }				t_msgt;
@@ -48,18 +46,21 @@ typedef struct s_shm
 
 typedef struct s_lem
 {
-	t_shm	*shm;
-    int		msgqid;
-	int		semid;
-	int		shmid;
-	int		alive;
-	int		creator;
-	int		main_player;	
-	int		nb_player;
-	int		nb_team;
-	int		team;
-	int		y;
-	int		x;
+	t_shm			*shm;
+	struct termios	prev_term;
+    int				msgqid;
+	int				semid;
+	int				shmid;
+	int				sem_taken;
+	int				alive;
+	int				pid;
+	int				creator;
+	int				nb_team;
+	int				team;
+	int				y;
+	int				x;
+	int				v;
+	int				c;
 }				t_lem;
 
 extern t_lem	lem;
@@ -68,6 +69,7 @@ extern t_lem	lem;
 int		create_game(t_lem *lem);
 
 /* utils.c */
+void	free_space(t_lem *lem);
 void	init_lem(t_lem *lem);
 void	catch_sigint(int signal);
 void	exit_free(t_lem *lem);
@@ -89,12 +91,13 @@ int		sem_post(int semid);
 int		move_player(t_lem *lem, int move);
 void	move_to_target(t_lem *lem, int dy, int dx);
 void	control_player(t_lem *lem);
-//int		init_shell_input(t_lem *lem);
-//void	restore_shell_input(t_lem *lem);
+int		init_shell_input(t_lem *lem);
+void	restore_shell_input(t_lem *lem);
 
 /* game_utils.c */
+int		check_equality(t_lem *lem);
 int		check_nearly_ennemi(t_lem *lem, int *dy, int *dx);
-int		check_nb_player_team(t_lem *lem);
+int		check_nb_player_team(t_lem *lem, int team);
 int		check_if_last_team(t_lem *lem);
 int		check_nb_player(t_lem *lem);
 int		check_if_empty(t_lem *lem);
@@ -109,5 +112,6 @@ int		receive_message(t_lem *lem, t_msgq *msgq);
 /* shm.c */
 void	*create_shared_memory(t_lem *lem);
 int		free_shm(t_lem *lem);
+void	init_shm(t_lem *lem);
 
 #endif
