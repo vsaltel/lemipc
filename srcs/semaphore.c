@@ -14,7 +14,13 @@ int		sem_alloc(t_lem *lem)
 	}
 	lem->semid = semget(key, 1, 0);
 	if (errno == ENOENT)
+	{
 		lem->semid = semget(key, 1, 0666 | IPC_CREAT);
+		if (lem->semid != -1 && lem->v)
+			ft_printf("semaphore created\n");
+	}
+	else if (lem->semid != -1 && lem->v)
+		ft_printf("semaphore joined\n");
 	if (lem->semid == -1)
 	{
 		perror("semget");

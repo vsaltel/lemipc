@@ -8,6 +8,7 @@ int		check_nearly_ennemi(t_lem *lem, int *dy, int *dx)
 	int	tvalue;
 
 	value = MAP_SIZE + MAP_SIZE;
+	*dy = -1;
 	y = -1;
 	sem_wait(lem->semid);
 	while (++y < MAP_SIZE)
@@ -26,7 +27,9 @@ int		check_nearly_ennemi(t_lem *lem, int *dy, int *dx)
 			}
 	}
 	sem_post(lem->semid);
-	return (1);
+	if (*dy != -1)
+		return (1);
+	return (0);
 }
 
 int		check_if_empty(t_lem *lem)
@@ -118,25 +121,35 @@ int		check_if_encircled(t_lem *lem)
 	int	count;
 	int	y;
 	int	x;
+	int	t;
 
 	count = 0;
-	y = (((lem->y - 1) < 0) ? 0 : lem->y - 1);
+	t = 0;
 	sem_wait(lem->semid);
-	while (y <= lem->y + 1)
+	while (++t <= lem->nb_team)
 	{
-		x = (((lem->x - 1) < 0) ? 0 : lem->x - 1);
-		while (x <= lem->x + 1)
+		if (t == lem->team)
+			continue;
+		y = (((lem->y - 1) < 0) ? 0 : lem->y - 1);
+		while (y <= lem->y + 1)
 		{
-			if (x < MAP_SIZE && y < MAP_SIZE &&
-				lem->shm->area[y][x] && lem->shm->area[y][x] != lem->team)
-				count++;
-			x++;
+			x = (((lem->x - 1) < 0) ? 0 : lem->x - 1);
+			while (x <= lem->x + 1)
+			{
+				if (x < MAP_SIZE && y < MAP_SIZE &&
+					lem->shm->area[y][x] && lem->shm->area[y][x] == t)
+					count++;
+				x++;
+			}
+			y++;
 		}
-		y++;
+		if (count >= 2)
+		{
+			sem_post(lem->semid);
+			return (1);
+		}
 	}
 	sem_post(lem->semid);
-	if (count >= 2)
-		return (1);
 	return (0);
 }
 

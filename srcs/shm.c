@@ -14,10 +14,13 @@ void	*create_shared_memory(t_lem *lem)
 	lem->shmid = shmget(key, sizeof(t_shm), 0666);
 	if (errno == ENOENT)
 	{
-		ft_printf("create shm\n");
 		lem->shmid = shmget(key, sizeof(t_shm), 0666 | IPC_CREAT);
+		if (lem->shmid != -1 && lem->v)
+			ft_printf("shm created\n");
 		lem->creator = 1;
 	}
+	else if (lem->shmid != -1 && lem->v)
+		ft_printf("shm joined\n");
 	if (lem->shmid == -1)
 	{
 		perror("shmget");

@@ -36,7 +36,6 @@ int		move_player(t_lem *lem, int move)
 
 void	move_to_target(t_lem *lem, int dy, int dx)
 {
-	ft_printf("move to target : %d %d\n", dy, dx);
 	if (dy > lem->y)
 	{
 		if (move_player(lem, DOWN))
@@ -84,7 +83,6 @@ void	control_player(t_lem *lem)
 			break;
 		else if (!ft_strncmp("\x03", buf, 1))
 			kill(lem->pid, SIGINT);
-		ft_dprintf(2, "lemipc: bad input or impossible move\n");
 	}
 	if (ret <= 0)
 		exit_free(lem);

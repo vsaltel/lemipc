@@ -20,7 +20,8 @@ static void	set_team(t_lem *lem)
 		}
 	}
 	lem->team = team;
-	ft_printf("Team : %d\n", lem->team);
+	if (lem->v)
+		ft_printf("Team : %d\n", lem->team);
 }
 
 static void	set_initial_position(t_lem *lem)
@@ -62,7 +63,8 @@ static void	wait_players(t_lem *lem)
 		if (tmp != nb)
 		{
 			nb = tmp;
-			ft_printf("Waiting players : %d/%d\n", nb, WAIT_PLAYER);
+			if (lem->v)
+				ft_printf("Waiting players : %d/%d\n", nb, WAIT_PLAYER);
 		}
 		usleep(30);
 	}

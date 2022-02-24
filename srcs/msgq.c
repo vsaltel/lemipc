@@ -7,7 +7,6 @@ int	join_msgq(t_lem *lem)
 {
     int key;
   
-    //key = ftok(MSGQ_NAME, 65);
     if ((key = ftok("/tmp", 65)) == -1)
 	{
 		perror("ftok");
@@ -16,11 +15,12 @@ int	join_msgq(t_lem *lem)
 	lem->msgqid = msgget(key, 0);
     if (errno == ENOENT)
 	{
-		ft_printf("msgq create\n");
     	lem->msgqid = msgget(key, 0666 | IPC_CREAT);
+		if (lem->msgqid != -1 && lem->v)
+			ft_printf("msg queue created\n");
 	}
-	else
-		ft_printf("msgq join\n");
+	else if (lem->msgqid != -1 && lem->v)
+		ft_printf("msg queue joined\n");
 	if (lem->msgqid == -1)
 	{
 		perror("msgget");
@@ -57,11 +57,10 @@ int		receive_message(t_lem *lem, t_msgq *msgq)
 {
 	int	ret;
 
-	msgq->mes.x = -1;
 	ret = msgrcv(lem->msgqid, msgq, sizeof(msgq->mes), 0, IPC_NOWAIT | MSG_NOERROR);
 	if (ret == -1 && errno != ENOMSG)
 		perror("msgrcv");
-	if (msgq->mes.x == -1)
+	if (ret == -1)
 		return (0);
 	return (1);
 }
