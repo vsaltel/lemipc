@@ -73,12 +73,12 @@ static void	wait_players(t_lem *lem)
 static void	load_game(t_lem	*lem)
 {
 	signal(SIGINT, &catch_sigint);
-	if (lem->c)
-		init_shell_input(lem);
 	set_team(lem);
 	set_initial_position(lem);
 	wait_players(lem);
 	usleep(100);
+	if (lem->c)
+		init_shell_input(lem);
 	player(lem);
 	if (lem->c)
 		restore_shell_input(lem);

@@ -37,7 +37,7 @@ void	catch_sigint(int signal)
 	if (lem.sem_taken)
 		sem_post(lem.semid);
 	free_space(&lem);
-	if (lem.c)
+	if (lem.c > 1)
 		restore_shell_input(&lem);
 	if (check_if_empty(&lem))
 		exit_free(&lem);

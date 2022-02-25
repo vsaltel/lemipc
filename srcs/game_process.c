@@ -4,11 +4,11 @@ static void	basic_move(t_lem *lem)
 {
 	static int n;
 
-	srand((time(NULL) / lem->pid) + n);
-	n = rand() % 3;
-	if (move_player(lem, n))
-		if (move_player(lem, (n == 3 ? 0 : n + 1)))
-			move_player(lem, (n >= 2 ? n - 2 : n + 2));
+	if (!n)
+		n = (lem->pid % 3) + 1;
+	move_player(lem, n - 1);
+	if (++n == 5)
+		n = 1;
 }
 
 static void	advanced_move(t_lem *lem)
@@ -73,12 +73,10 @@ void	player(t_lem *lem)
 		}
 		if (lem->alive)
 			player_process(lem);
-		if (lem->creator)
-		{
+		if (lem->creator || lem->c)
 			display_map(lem);
-			if (!lem->alive && check_if_empty(lem))
+		if (lem->creator && !lem->alive && check_if_empty(lem))
 				return ;
-		}
 		sleep(SLEEP_VALUE);
 	}
 }

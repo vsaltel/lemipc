@@ -36,29 +36,63 @@ int		move_player(t_lem *lem, int move)
 
 void	move_to_target(t_lem *lem, int dy, int dx)
 {
-	if (dy > lem->y)
+	static int i;
+
+	if (!i)
 	{
-		if (move_player(lem, DOWN))
-			if (move_player(lem, LEFT))
-				move_player(lem, RIGHT);
-	}
-	else if (dx > lem->x)
-	{
-		if (move_player(lem, RIGHT))
-			if (move_player(lem, UP))
-				move_player(lem, DOWN);
-	}
-	else if (dy < lem->y)
-	{
-		if (move_player(lem, UP))
-			if (move_player(lem, RIGHT))
-				move_player(lem, LEFT);
-	}
-	else if (dx < lem->x)
-	{
-		if (move_player(lem, LEFT))
+		if (dy > lem->y)
+		{
 			if (move_player(lem, DOWN))
-				move_player(lem, UP);
+				if (move_player(lem, LEFT))
+					move_player(lem, RIGHT);
+		}
+		else if (dx > lem->x)
+		{
+			if (move_player(lem, RIGHT))
+				if (move_player(lem, UP))
+					move_player(lem, DOWN);
+		}
+		else if (dy < lem->y)
+		{
+			if (move_player(lem, UP))
+				if (move_player(lem, RIGHT))
+					move_player(lem, LEFT);
+		}
+		else if (dx < lem->x)
+		{
+			if (move_player(lem, LEFT))
+				if (move_player(lem, DOWN))
+					move_player(lem, UP);
+		}
+		i++;
+	}
+	else
+	{
+		if (dx < lem->x)
+		{
+			if (move_player(lem, LEFT))
+				if (move_player(lem, DOWN))
+					move_player(lem, UP);
+		}
+		else if (dy < lem->y)
+		{
+			if (move_player(lem, UP))
+				if (move_player(lem, RIGHT))
+					move_player(lem, LEFT);
+		}
+		else if (dx > lem->x)
+		{
+			if (move_player(lem, RIGHT))
+				if (move_player(lem, UP))
+					move_player(lem, DOWN);
+		}
+		else if (dy > lem->y)
+		{
+			if (move_player(lem, DOWN))
+				if (move_player(lem, LEFT))
+					move_player(lem, RIGHT);
+		}
+		i = 0;
 	}
 }
 
@@ -92,15 +126,23 @@ int		init_shell_input(t_lem *lem)
 {
 	struct termios term;
 
+	ft_printf("there\n");
 	if (!isatty(0))
+	{
+		lem->c = 0;
 		return (1);
+	}
 	tcgetattr(0, &term);
 	lem->prev_term = term;
 	term.c_lflag &= ~(ICANON | ECHO | IEXTEN | OPOST);
 	term.c_cc[VMIN] = 1;
 	term.c_cc[VTIME] = 0;
 	if (tcsetattr(0, TCSANOW, &term))
+	{
+		lem->c = 0;
 		return (2);
+	}
+	lem->c++;
 	return (0);
 }
 

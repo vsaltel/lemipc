@@ -44,7 +44,7 @@ int	send_target_msg(t_lem *lem, int y, int x)
 	msgq.mes.y = y;
 	msgq.mes.pid = lem->pid;
 	msgq.mesg_type = lem->team;
-	nb = check_nb_player_team(lem, lem->team) + 1;
+	nb = check_nb_player_team(lem, lem->team) + 2;
 	while (--nb > 0)
 		if ((ret = msgsnd(lem->msgqid, &msgq, sizeof(msgq.mes), 0)) == -1)
 			break;
